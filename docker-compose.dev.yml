@@ -24,12 +24,13 @@ services:
     build:
       context: ./backend-auth
       dockerfile: Dockerfile
-    container_name: jwt-backend-auth
+    container_name: jwt-backend-auth-dev
+    # 개발: Django runserver (Hot Reload)
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend-auth:/app
     ports:
-      - "${BACKEND_AUTH_PORT}:8000"
+      - "${BACKEND_AUTH_PORT:-8000}:8000"
     env_file:
       - .env
     depends_on:
@@ -42,12 +43,13 @@ services:
     build:
       context: ./backend-api
       dockerfile: Dockerfile
-    container_name: jwt-backend-api
+    container_name: jwt-backend-api-dev
+    # 개발: uvicorn --reload (Hot Reload)
     command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
     volumes:
       - ./backend-api:/app
     ports:
-      - "${BACKEND_API_PORT}:8001"
+      - "${BACKEND_API_PORT:-8001}:8001"
     env_file:
       - .env
     depends_on:
@@ -61,12 +63,12 @@ services:
     image: node:20-alpine
     container_name: jwt-frontend-dev
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     ports:
-      - "${FRONTEND_PORT}:3000"
+      - "3000:3000"
     networks:
       - jwt-network
     depends_on:
