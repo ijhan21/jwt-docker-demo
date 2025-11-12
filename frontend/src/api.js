@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 // API 기본 URL 설정
-const AUTH_API_URL = import.meta.env.VITE_API_AUTH_URL || 'http://localhost:8000/api/auth';
-const MEMOS_API_URL = import.meta.env.VITE_API_MEMOS_URL || 'http://localhost:8001/api/memos';
+// 개발: Vite 프록시 사용 (/api/auth, /api/memos)
+// 프로덕션: 환경변수 또는 절대 경로
+const AUTH_API_URL = import.meta.env.VITE_API_AUTH_URL || '/api/auth';
+const MEMOS_API_URL = import.meta.env.VITE_API_MEMOS_URL || '/api/memos';
 
 // Axios 인스턴스 생성
 const authApi = axios.create({
