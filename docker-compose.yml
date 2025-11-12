@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: jwt-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jwt-network
+
+  backend-auth:
+    build:
+      context: ./backend-auth
+      dockerfile: Dockerfile
+    container_name: jwt-backend-auth
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./backend-auth:/app
+    ports:
+      - "${BACKEND_AUTH_PORT}:8000"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - jwt-network
+
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    container_name: jwt-backend-api
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./backend-api:/app
+    ports:
+      - "${BACKEND_API_PORT}:8001"
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - jwt-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: jwt-frontend
+    ports:
+      - "${FRONTEND_PORT}:80"
+    networks:
+      - jwt-network
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: jwt-nginx
+    ports:
+      - "${NGINX_PORT}:80"
+      - "${NGINX_SSL_PORT}:443"
+    depends_on:
+      - backend-auth
+      - backend-api
+      - frontend
+    networks:
+      - jwt-network
+
+networks:
+  jwt-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
