@@ -3,11 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# package.json과 package-lock.json 복사
+# package.json 복사
 COPY package*.json ./
 
 # 의존성 설치
-RUN npm ci
+RUN npm install
 
 # 소스 코드 복사
 COPY . .

@@ -132,27 +132,42 @@ git clone <repository-url>
 cd jwt-docker-demo
 ```
 
-### 2. 환경변수 확인
+### 2. 환경변수 설정
 
-`.env` 파일을 확인하고 필요시 수정:
+`.env` 파일이 프로젝트 루트에 생성되어 있습니다. 필요시 수정하세요:
 
 ```env
-# 데이터베이스
-POSTGRES_DB=jwtdemo
-POSTGRES_USER=jwtuser
-POSTGRES_PASSWORD=jwtpassword123
+# Database Configuration
+POSTGRES_DB=jwt_demo_db
+POSTGRES_USER=jwt_admin
+POSTGRES_PASSWORD=jwt_secure_password_123
 
-# JWT 설정 (DRF와 FastAPI가 공유)
-JWT_SECRET_KEY=your-super-secret-jwt-key-change-this-in-production-12345
+# Backend Ports
+BACKEND_AUTH_PORT=8000
+BACKEND_API_PORT=8001
+
+# Frontend Port
+FRONTEND_PORT=3000
+
+# Nginx Ports
+NGINX_PORT=80
+NGINX_SSL_PORT=443
+
+# JWT Configuration (for Django and FastAPI backends)
+JWT_SECRET_KEY=your-secret-key-change-in-production
 JWT_ALGORITHM=HS256
-JWT_EXPIRE_MINUTES=60
+JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# Django
-DJANGO_SECRET_KEY=django-insecure-change-this-in-production-67890
-DJANGO_DEBUG=True
+# Database URL for backends
+DATABASE_URL=postgresql://jwt_admin:jwt_secure_password_123@db:5432/jwt_demo_db
 ```
 
-**⚠️ 주의**: 프로덕션 환경에서는 반드시 시크릿 키를 변경하세요!
+**⚠️ 보안 주의사항**:
+- 프로덕션 환경에서는 반드시 `POSTGRES_PASSWORD`와 `JWT_SECRET_KEY`를 강력한 값으로 변경하세요
+- 강력한 시크릿 키 생성 방법:
+  ```bash
+  python -c "import secrets; print(secrets.token_urlsafe(32))"
+  ```
 
 ### 3. Docker Compose 실행
 
@@ -329,7 +344,7 @@ docker-compose ps
 
 # 컨테이너 내부 접속
 docker-compose exec backend-auth bash
-docker-compose exec db psql -U jwtuser -d jwtdemo
+docker-compose exec db psql -U jwt_admin -d jwt_demo_db
 
 # 재빌드
 docker-compose build

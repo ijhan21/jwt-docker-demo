@@ -1,10 +1,11 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
 # 필요한 시스템 패키지 설치
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    dos2unix \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성 설치
@@ -16,7 +17,7 @@ COPY . .
 
 # 마이그레이션 및 서버 시작 스크립트
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN dos2unix /entrypoint.sh && chmod +x /entrypoint.sh
 
 EXPOSE 8000
 
